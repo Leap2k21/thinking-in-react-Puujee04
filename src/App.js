@@ -23,43 +23,37 @@ export default App;
 const FilterableProductTable = (props) => {
   const {products} = props;
   const [filterData, setFilterData] = useState(products);
-  const [str, setStr] = useState('');
-  const changeData = (value) => {
-    setStr(value);
-    const filt = products.filter(el => el.name.includes(value));
-    setFilterData(filt); 
-  }
 
-  const checkedData = (checked) => {
-    console.log(checked);
-    if(checked){
-      const filt = filterData.filter(el => el.stocked);
-      setFilterData(filt);
-    }
-    else{
-      // console.log(strS);
-      let filt = products.filter(el => !el.stocked && el.name.includes(str));
-      console.log(filt);
-      filt = [...filterData, ...filt];
-      // console.log(filt);
-      setFilterData(filt);
-    }
+  const onSearch = ({name, isChecked}) => {
+    let results;
+    isChecked ? results = products.filter(el => el.stocked && el.name.includes(name)) : results = products.filter(el => el.name.includes(name))
+    setFilterData(results);
   }
   
   return(
     <div className='filterableProductTable'>
-      <SearchBar changeData={changeData} checkedData = {checkedData}></SearchBar>
+      <SearchBar onSearchDone={onSearch}></SearchBar>
       <ProductTable products = {filterData}></ProductTable>
     </div>
   )
 }
 
-const SearchBar = ({changeData, checkedData}) => {
+const SearchBar = ({onSearchDone}) => {
+  const [str, setStr] = useState('');
+  const [isChecked, setIsChecked] = useState(false);
+
+  useEffect(() => {
+    onSearchDone({
+      name: str,
+      isChecked,
+    })
+  }, [str, isChecked]);
+
   return(
     <div className='searchBar'>
-      <input type='search' placeholder='Search' onChange={(e) => changeData(e.target.value)}></input>
+      <input type='search' placeholder='Search' onChange={(e) => setStr(e.target.value)}></input>
       <div>
-        <input type='checkbox' onChange={(e) => {checkedData(e.target.checked)}}></input>
+        <input type='checkbox' onChange={(e) => setIsChecked(e.target.checked)}></input>
         <span>Only show products in stock</span>
       </div>    
   </div>
